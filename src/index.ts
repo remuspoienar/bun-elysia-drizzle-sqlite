@@ -37,7 +37,7 @@ export const app = new Elysia({ prefix: "/api" })
   .use(articlesController)
   .use(commentsController)
   .use(tagsController)
-  .listen(3001);
+  .listen(Bun.env.PORT || 3001);
 
 export type App = typeof app;
 console.log(
