@@ -1,10 +1,11 @@
 import { eq } from "drizzle-orm";
+import { unauthorized, unprocessable } from "../common/utils";
 import db from "../db/connection";
 import { users } from "../db/schema";
-import { unprocessable, unauthorized } from "../common/utils";
+import type { UserInsert } from "./users.schema";
 
 export abstract class UserService {
-  static async create(body: typeof users.$inferInsert) {
+  static async create(body: UserInsert) {
     body.password = await Bun.password.hash(body.password);
     try {
       const res = await db.insert(users).values(body).returning();
@@ -37,7 +38,7 @@ export abstract class UserService {
       .sync();
   }
 
-  static update(id: number, data: Partial<typeof users.$inferInsert>) {
+  static update(id: number, data: Partial<UserInsert>) {
     try {
       return db.update(users).set(data).where(eq(users.id, id)).execute();
     } catch (e) {

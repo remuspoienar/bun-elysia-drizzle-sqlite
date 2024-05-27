@@ -1,7 +1,5 @@
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import db, { closeDb } from "./connection";
 
-import dbConfig from "../../drizzle.config";
-
-migrate(db, { migrationsFolder: dbConfig.out });
+migrate(db, { migrationsFolder: "sqlite/migrations" });
 closeDb();

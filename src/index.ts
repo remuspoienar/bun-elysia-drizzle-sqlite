@@ -1,9 +1,12 @@
-import jwt from "@elysiajs/jwt";
+import cors from "@elysiajs/cors";
 import { Elysia, ValidationError } from "elysia";
+import articlesController from "./articles/articles.controller";
 import { unprocessable } from "./common/utils";
+import tagsController from "./tags/tags.controller";
 import usersController from "./users/users.controller";
 
 const app = new Elysia({ prefix: "/api" })
+  .use(cors())
   .onError(({ set, error }) => {
     set.headers["content-type"] = "application/json";
     if (error instanceof ValidationError) {
@@ -18,7 +21,7 @@ const app = new Elysia({ prefix: "/api" })
             (o: Record<string, string>) =>
               `Error in ${o.path}${
                 o.schema &&
-                ` of ${Object.entries(o.schema).map((arr) => arr.join(" "))}`
+                ` of ${Object.entries(o.schema).map(arr => arr.join(" "))}`
               }: ${o.message}`
           )
         );
@@ -28,6 +31,8 @@ const app = new Elysia({ prefix: "/api" })
     }
   })
   .use(usersController)
+  .use(articlesController)
+  .use(tagsController)
   .listen(3001);
 
 export type App = typeof app;

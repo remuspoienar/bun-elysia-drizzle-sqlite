@@ -36,3 +36,23 @@ export function notFound(cause?: any) {
     errors: { body: [cause ? `${cause}` : "Invalid resource identifier"] },
   });
 }
+
+export function toSlug(str: string) {
+  return str
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-");
+}
+
+export function isDefined<T>(thing?: T | null | undefined): thing is T {
+  return thing !== undefined && thing !== null;
+}
+
+export function isString(thing?: string | null | undefined): thing is string {
+  return typeof thing === "string";
+}

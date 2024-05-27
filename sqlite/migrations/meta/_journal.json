@@ -8,6 +8,20 @@
       "when": 1714520864015,
       "tag": "0000_absent_baron_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1714677160396,
+      "tag": "0001_lucky_warpath",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1714765265068,
+      "tag": "0002_safe_reptil",
+      "breakpoints": true
     }
   ]
 }
