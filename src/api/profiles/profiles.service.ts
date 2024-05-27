@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { notFound, unprocessable } from "../../common/utils";
+import { notFound } from "../../common/utils";
 import db from "../../db/connection";
 import { userFollows, users } from "../../db/schema";
 import { formatProfile } from "./profiles.utils";

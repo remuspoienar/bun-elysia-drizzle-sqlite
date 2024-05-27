@@ -45,7 +45,7 @@ const usersController = new Elysia()
     app =>
       app
         .resolve(getAuthUserId)
-        .get("user", async ({ userId, token }) => {
+        .get("user", ({ userId, token }) => {
           const user = UserService.find(userId);
           if (!user) {
             throw notFound();
@@ -54,9 +54,9 @@ const usersController = new Elysia()
         })
         .put(
           "user",
-          async ({ body, userId, token }) => {
+          ({ body, userId, token }) => {
             const { username, bio, image, email } = body.user;
-            await UserService.update(userId, {
+            UserService.update(userId, {
               username,
               bio,
               image,

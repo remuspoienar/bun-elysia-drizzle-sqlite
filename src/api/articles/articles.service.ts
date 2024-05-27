@@ -1,10 +1,11 @@
-import { desc, eq, like, sql } from "drizzle-orm";
+import { and, desc, eq, like } from "drizzle-orm";
 import { isDefined, notFound, toSlug, unprocessable } from "../../common/utils";
 import db from "../../db/connection";
 import {
   articles,
   tags,
   tagsArticles,
+  userFavorites,
   userFollows,
   users,
 } from "../../db/schema";
@@ -16,15 +17,15 @@ import type {
   ArticlePayload,
   ArticleQuery,
 } from "./articles.schema";
-import { formattedArticle } from "./articles.util";
+import { articleFields, formattedArticle } from "./articles.util";
 
 export abstract class ArticleService {
-  static create(userId: number, articlePayload: ArticlePayload) {
+  static create(articlePayload: ArticlePayload, currentUserId: number) {
     const { tagList, ...article } = articlePayload;
     const values: ArticleInsert[] = [
       {
         ...article,
-        authorId: userId,
+        authorId: currentUserId,
         slug: toSlug(article.title),
       },
     ];
@@ -36,32 +37,14 @@ export abstract class ArticleService {
           TagService.createLink(res.id, tags, tx);
         }
 
-        return this.get(res.slug);
+        return this.get(res.slug, currentUserId);
       });
     } catch (e) {
       throw unprocessable(e);
     }
   }
 
-  // static get(slug: string) {
-  // const article = db
-  //   .select(allArticleFields)
-  //   .from(articles)
-  //   .where(eq(articles.slug, slug))
-  //   .limit(1)
-  //   .leftJoin(tagsArticles, eq(tagsArticles.articleId, articles.id))
-  //   .leftJoin(tags, eq(tagsArticles.tagId, tags.id))
-  //   .innerJoin(users, eq(articles.authorId, users.id))
-  //   .get();
-
-  // if (!article?.slug) {
-  //   throw notFound();
-  // }
-
-  // return formattedArticle(article);
-  // }
-
-  static get(slug: string) {
+  static get(slug: string, currentUserId?: number) {
     const article = db.query.articles
       .findFirst({
         where: eq(articles.slug, slug),
@@ -72,6 +55,7 @@ export abstract class ArticleService {
               tag: true,
             },
           },
+          userFavorites: true,
         },
       })
       .sync();
@@ -79,10 +63,18 @@ export abstract class ArticleService {
     if (!article?.slug) {
       throw notFound();
     }
+
     const author = formatProfile(article.author);
+
     const tagList = article.tagsArticles
       .map(ta => ta.tag.name)
       .sort((a, b) => (a < b ? -1 : 1));
+
+    const favorited =
+      !!currentUserId &&
+      !!article.userFavorites.find(fav => fav.userId === currentUserId);
+
+    const favoritesCount = article.userFavorites.length;
 
     return {
       slug: article.slug,
@@ -91,33 +83,49 @@ export abstract class ArticleService {
       body: article.body,
       createdAt: article.createdAt,
       updatedAt: article.updatedAt,
+      favorited,
+      favoritesCount,
       tagList,
       author,
     };
   }
 
-  static getList(q: ArticleQuery, currentUserId?: number) {
-    const { author: userName, tag: tagName } = q;
+  static getFeed(
+    q: Pick<ArticleQuery, "offset" | "limit">,
+    currentUserId: number
+  ) {
+    const { limit, offset } = q;
 
-    const query = db
-      .select({
-        slug: articles.slug,
-        title: articles.title,
-        body: articles.body,
-        description: articles.description,
-        tagString: sql<string>`json_group_array(${tags.name})`.as("tags"),
-        createdAt: articles.createdAt,
-        updatedAt: articles.updatedAt,
-        username: users.username,
-        bio: users.bio,
-        image: users.image,
-        userFollows: sql<string>`json_group_array(${userFollows.followerId})`.as("userFollows")
-      })
+    return db
+      .select(articleFields)
       .from(articles)
       .leftJoin(tagsArticles, eq(tagsArticles.articleId, articles.id))
       .innerJoin(tags, eq(tagsArticles.tagId, tags.id))
       .innerJoin(users, eq(articles.authorId, users.id))
-      .leftJoin(userFollows, eq(userFollows.followedId, users.id));
+      .leftJoin(userFollows, eq(userFollows.followedId, users.id))
+      .leftJoin(userFavorites, eq(userFavorites.articleId, articles.id))
+      .where(eq(userFollows.followerId, currentUserId))
+      .limit(limit || 20)
+      .offset(offset || 0)
+      .groupBy(articles.id)
+      .orderBy(desc(articles.createdAt))
+      .all()
+      .map(row => formattedArticle(row, currentUserId));
+  }
+
+  static getList(q: ArticleQuery, currentUserId?: number) {
+    const { author: userName, tag: tagName, limit, offset } = q;
+
+    const query = db
+      .select(articleFields)
+      .from(articles)
+      .leftJoin(tagsArticles, eq(tagsArticles.articleId, articles.id))
+      .innerJoin(tags, eq(tagsArticles.tagId, tags.id))
+      .innerJoin(users, eq(articles.authorId, users.id))
+      .leftJoin(userFollows, eq(userFollows.followedId, users.id))
+      .leftJoin(userFavorites, eq(userFavorites.articleId, articles.id))
+      .limit(limit || 20)
+      .offset(offset || 0);
 
     if (isDefined(userName)) {
       query.where(eq(users.username, userName));
@@ -135,7 +143,11 @@ export abstract class ArticleService {
       .map(row => formattedArticle(row, currentUserId));
   }
 
-  static update(slug: string, data: Partial<ArticleBase>) {
+  static update(
+    slug: string,
+    data: Partial<ArticleBase>,
+    currentUserId?: number
+  ) {
     const article = db.query.articles
       .findFirst({ where: eq(articles.slug, slug) })
       .sync();
@@ -152,10 +164,54 @@ export abstract class ArticleService {
 
     db.update(articles).set(newValues).where(eq(articles.id, article.id)).run();
 
-    return this.get(newValues.slug || article.slug);
+    return this.get(newValues.slug || article.slug, currentUserId);
   }
 
   static delete(slug: string) {
     db.delete(articles).where(eq(articles.slug, slug)).run();
+  }
+
+  static addFavorite(slug: string, currentUserId: number) {
+    const article = db.query.articles
+      .findFirst({
+        where: eq(articles.slug, slug),
+      })
+      .sync();
+
+    if (!article?.slug) {
+      throw notFound();
+    }
+
+    try {
+      db.insert(userFavorites)
+        .values([{ articleId: article.id, userId: currentUserId }])
+        .run();
+      return this.get(slug, currentUserId);
+    } catch (e) {
+      return this.get(slug, currentUserId);
+    }
+  }
+
+  static removeFavorite(slug: string, currentUserId: number) {
+    const article = db.query.articles
+      .findFirst({
+        where: eq(articles.slug, slug),
+      })
+      .sync();
+
+    if (!article?.slug) {
+      throw notFound();
+    }
+
+    db.delete(userFavorites)
+      .where(
+        and(
+          eq(userFavorites.articleId, article.id),
+          eq(userFavorites.userId, currentUserId)
+        )
+      )
+      .run();
+
+    return this.get(slug, currentUserId);
   }
 }

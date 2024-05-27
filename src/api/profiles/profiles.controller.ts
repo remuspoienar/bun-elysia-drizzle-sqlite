@@ -16,7 +16,7 @@ const profilesController = new Elysia({ prefix: "/profiles" }).use(jwt).guard(
       .resolve(getAuthUserId)
       .get(
         ":username",
-        async ({ params, userId }) => {
+        ({ params, userId }) => {
           const profile = ProfileService.get(params.username, userId);
           if (!profile) {
             throw notFound();
@@ -31,7 +31,7 @@ const profilesController = new Elysia({ prefix: "/profiles" }).use(jwt).guard(
       )
       .post(
         ":username/follow",
-        async ({ params, userId }) => {
+        ({ params, userId }) => {
           const profile = ProfileService.follow(params.username, userId);
           return { profile };
         },
@@ -43,7 +43,7 @@ const profilesController = new Elysia({ prefix: "/profiles" }).use(jwt).guard(
       )
       .delete(
         ":username/follow",
-        async ({ params, userId }) => {
+        ({ params, userId }) => {
           const profile = ProfileService.unfollow(params.username, userId);
           return { profile };
         },

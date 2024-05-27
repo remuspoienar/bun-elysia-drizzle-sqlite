@@ -6,10 +6,8 @@ export function formatProfile(
   currentUserId?: number
 ) {
   const { username, bio, image } = user;
-  const following = currentUserId
-    ? user.followers?.findIndex(
-        record => record.followerId === currentUserId
-      ) !== -1
-    : false;
+  const following =
+    !!currentUserId &&
+    !!user.followers?.find(record => record.followerId === currentUserId);
   return { username, bio, image, following };
 }

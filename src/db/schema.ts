@@ -19,6 +19,7 @@ const timestamp = customType<{
   },
 });
 
+// users
 export const users = sqliteTable("users", {
   id: integer("id", { mode: "number" })
     .primaryKey({ autoIncrement: true })
@@ -35,8 +36,10 @@ export const usersRelations = relations(users, ({ many }) => ({
   comments: many(comments),
   followers: many(userFollows, { relationName: "followed" }),
   following: many(userFollows, { relationName: "follower" }),
+  userFavorites: many(userFavorites),
 }));
 
+// articles
 export const articles = sqliteTable("articles", {
   id: integer("id", { mode: "number" })
     .primaryKey({ autoIncrement: true })
@@ -60,8 +63,10 @@ export const articleRelations = relations(articles, ({ one, many }) => ({
   author: one(users, { fields: [articles.authorId], references: [users.id] }),
   comments: many(comments),
   tagsArticles: many(tagsArticles),
+  userFavorites: many(userFavorites),
 }));
 
+// tags
 export const tags = sqliteTable("tags", {
   id: integer("id", { mode: "number" })
     .primaryKey({ autoIncrement: true })
@@ -96,6 +101,7 @@ export const tagsArticlesRelations = relations(tagsArticles, ({ one }) => ({
   }),
 }));
 
+// comments
 export const comments = sqliteTable("comments", {
   id: integer("id", { mode: "number" })
     .primaryKey({ autoIncrement: true })
@@ -123,6 +129,7 @@ export const commentRelations = relations(comments, ({ one }) => ({
   }),
 }));
 
+// user follows
 export const userFollows = sqliteTable(
   "userFollows",
   {
@@ -148,5 +155,32 @@ export const userFollowsRelations = relations(userFollows, ({ one }) => ({
     fields: [userFollows.followedId],
     references: [users.id],
     relationName: "followed",
+  }),
+}));
+
+// user favorites
+export const userFavorites = sqliteTable(
+  "userFavorites",
+  {
+    articleId: integer("articleId")
+      .notNull()
+      .references(() => articles.id, { onDelete: "cascade" }),
+    userId: integer("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  t => ({
+    pk: primaryKey({ columns: [t.articleId, t.userId] }),
+  })
+);
+
+export const userFavoritesRelations = relations(userFavorites, ({ one }) => ({
+  article: one(articles, {
+    fields: [userFavorites.articleId],
+    references: [articles.id],
+  }),
+  user: one(users, {
+    fields: [userFavorites.userId],
+    references: [users.id],
   }),
 }));

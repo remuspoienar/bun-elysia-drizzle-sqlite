@@ -1,14 +1,14 @@
 import { Elysia, t } from "elysia";
 import jwt from "../../common/jwt";
 import { getAuthUserId, unauthorized } from "../../common/utils";
-import { articleBase, articlePayload } from "./articles.schema";
+import { articleBase, articlePayload, articleQuery } from "./articles.schema";
 import { ArticleService } from "./articles.service";
 
 export const articlesController = new Elysia({ prefix: "/articles" })
   .use(jwt)
-  .resolve(async ctx => {
+  .resolve(async ({ headers, jwt }) => {
     try {
-      const data = await getAuthUserId(ctx);
+      const data = await getAuthUserId({ headers, jwt });
       return data;
     } catch (e) {
       return { userId: undefined, token: undefined };
@@ -21,19 +21,13 @@ export const articlesController = new Elysia({ prefix: "/articles" })
       return { articles, articlesCount: articles.length };
     },
     {
-      query: t.Partial(
-        t.Object({
-          author: t.String({ minLength: 1 }),
-          tag: t.String({ minLength: 1 }),
-          favorited: t.String({ minLength: 1 }),
-        })
-      ),
+      query: t.Partial(articleQuery),
     }
   )
   .get(
     ":slug",
-    ({ params }) => {
-      const article = ArticleService.get(params.slug);
+    ({ params, userId }) => {
+      const article = ArticleService.get(params.slug, userId);
       return { article };
     },
     {
@@ -53,10 +47,20 @@ export const articlesController = new Elysia({ prefix: "/articles" })
     app =>
       app
         .resolve(getAuthUserId)
+        .get(
+          "feed",
+          ({ userId, query }) => {
+            const articles = ArticleService.getFeed(query, userId);
+            return { articles, articlesCount: articles.length };
+          },
+          {
+            query: t.Partial(t.Pick(articleQuery, ["limit", "offset"])),
+          }
+        )
         .post(
           "",
           ({ userId, body, set }) => {
-            const article = ArticleService.create(userId, body.article);
+            const article = ArticleService.create(body.article, userId);
             set.status = 201;
             return { article };
           },
@@ -68,8 +72,12 @@ export const articlesController = new Elysia({ prefix: "/articles" })
         )
         .put(
           ":slug",
-          ({ params, body }) => {
-            const article = ArticleService.update(params.slug, body.article);
+          ({ userId, params, body }) => {
+            const article = ArticleService.update(
+              params.slug,
+              body.article,
+              userId
+            );
             return { article };
           },
           {
@@ -86,6 +94,30 @@ export const articlesController = new Elysia({ prefix: "/articles" })
           ({ params, set }) => {
             ArticleService.delete(params.slug);
             set.status = 204;
+          },
+          {
+            params: t.Object({
+              slug: t.String(),
+            }),
+          }
+        )
+        .post(
+          ":slug/favorite",
+          ({ userId, params }) => {
+            const article = ArticleService.addFavorite(params.slug, userId);
+            return { article };
+          },
+          {
+            params: t.Object({
+              slug: t.String(),
+            }),
+          }
+        )
+        .delete(
+          ":slug/favorite",
+          ({ userId, params }) => {
+            const article = ArticleService.removeFavorite(params.slug, userId);
+            return { article };
           },
           {
             params: t.Object({
