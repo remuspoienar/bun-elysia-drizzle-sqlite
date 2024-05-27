@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 import { t, type Static } from "elysia";
-import { articles } from "../db/schema";
+import { articles } from "../../db/schema";
 
 export const articleInsert = createInsertSchema(articles);
 export const articleSelect = createSelectSchema(articles);

@@ -1,13 +1,15 @@
 import cors from "@elysiajs/cors";
 import { Elysia, ValidationError } from "elysia";
-import articlesController from "./articles/articles.controller";
+import articlesController from "./api/articles/articles.controller";
+import tagsController from "./api/tags/tags.controller";
+import usersController from "./api/users/users.controller";
 import { unprocessable } from "./common/utils";
-import tagsController from "./tags/tags.controller";
-import usersController from "./users/users.controller";
+import commentsController from "./api/comments/comments.controller";
 
 export const app = new Elysia({ prefix: "/api" })
   .use(cors())
   .onError(({ set, error }) => {
+    console.log({error})
     set.headers["content-type"] = "application/json";
     if (error instanceof ValidationError) {
       /* attempting to return detailed error response while maintaing realworld api error response structure
@@ -32,6 +34,7 @@ export const app = new Elysia({ prefix: "/api" })
   })
   .use(usersController)
   .use(articlesController)
+  .use(commentsController)
   .use(tagsController)
   .listen(3001);
 

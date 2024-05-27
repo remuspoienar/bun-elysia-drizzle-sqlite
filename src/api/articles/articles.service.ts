@@ -1,7 +1,7 @@
 import { desc, eq, like, sql } from "drizzle-orm";
-import { isDefined, notFound, toSlug, unprocessable } from "../common/utils";
-import db from "../db/connection";
-import { articles, tags, tagsArticles, users } from "../db/schema";
+import { isDefined, notFound, toSlug, unprocessable } from "../../common/utils";
+import db from "../../db/connection";
+import { articles, tags, tagsArticles, users } from "../../db/schema";
 import { TagService } from "../tags/tags.service";
 import type {
   ArticleBase,

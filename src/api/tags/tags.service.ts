@@ -1,7 +1,7 @@
 import type { SQLiteTransaction } from "drizzle-orm/sqlite-core";
-import db from "../db/connection";
+import db from "../../db/connection";
 
-import { tags, tagsArticles } from "../db/schema";
+import { tags, tagsArticles } from "../../db/schema";
 import type { Tag } from "./tags.schema";
 
 export abstract class TagService {

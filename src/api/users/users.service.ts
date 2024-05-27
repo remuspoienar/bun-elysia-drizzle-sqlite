@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import { unauthorized, unprocessable } from "../common/utils";
-import db from "../db/connection";
-import { users } from "../db/schema";
+import { unauthorized, unprocessable } from "../../common/utils";
+import db from "../../db/connection";
+import { users } from "../../db/schema";
 import type { UserInsert } from "./users.schema";
 
 export abstract class UserService {

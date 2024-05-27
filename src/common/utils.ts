@@ -4,7 +4,7 @@ import { type JwtContext } from "./jwt";
 export async function getAuthUserId({
   headers: { authorization },
   jwt,
-}: Context & JwtContext) {
+}: Pick<Context, 'headers'> & JwtContext) {
   const token = authorization?.replace("Token ", "");
   const payload = await jwt.verify(token);
   if (!payload) {

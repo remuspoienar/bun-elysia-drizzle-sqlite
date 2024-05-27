@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
-import jwt from "../common/jwt";
-import { getAuthUserId, unauthorized } from "../common/utils";
+import jwt from "../../common/jwt";
+import { getAuthUserId, unauthorized } from "../../common/utils";
 import { articleBase, articlePayload } from "./articles.schema";
 import { ArticleService } from "./articles.service";
 
