@@ -64,6 +64,6 @@ export abstract class CommentService {
   }
 
   static delete(id: number) {
-    db.delete(comments).where(eq(comments.id, id)).execute();
+    db.delete(comments).where(eq(comments.id, id)).run();
   }
 }

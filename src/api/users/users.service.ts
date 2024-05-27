@@ -40,9 +40,17 @@ export abstract class UserService {
 
   static update(id: number, data: Partial<UserInsert>) {
     try {
-      return db.update(users).set(data).where(eq(users.id, id)).execute();
+      return db.update(users).set(data).where(eq(users.id, id)).run();
     } catch (e) {
       throw unprocessable(e);
     }
+  }
+
+  static findByUsername(username: string) {
+    return db.query.users
+      .findFirst({
+        where: eq(users.username, username),
+      })
+      .sync();
   }
 }

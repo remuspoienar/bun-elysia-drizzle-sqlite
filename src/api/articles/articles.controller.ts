@@ -16,8 +16,8 @@ export const articlesController = new Elysia({ prefix: "/articles" })
   })
   .get(
     "",
-    ({ query }) => {
-      const articles = ArticleService.getList(query);
+    ({ query, userId }) => {
+      const articles = ArticleService.getList(query, userId);
       return { articles, articlesCount: articles.length };
     },
     {

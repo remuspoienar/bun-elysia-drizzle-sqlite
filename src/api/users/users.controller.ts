@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import jwt from "../../common/jwt";
-import { getAuthUserId, notFound } from "../../common/utils";
+import { getAuthUserId, notFound, unauthorized } from "../../common/utils";
 import { userInsert } from "./users.schema";
 import { UserService } from "./users.service";
 import { formattedUser } from "./users.util";
@@ -36,9 +36,11 @@ const usersController = new Elysia()
   )
   .guard(
     {
-      headers: t.Object({
-        authorization: t.TemplateLiteral("Token ${string}"),
-      }),
+      beforeHandle({ headers: { authorization, ...headers } }) {
+        if (!authorization || authorization.toString() === "") {
+          throw unauthorized();
+        }
+      },
     },
     app =>
       app

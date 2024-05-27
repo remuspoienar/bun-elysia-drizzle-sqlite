@@ -33,6 +33,8 @@ export const users = sqliteTable("users", {
 export const usersRelations = relations(users, ({ many }) => ({
   articles: many(articles),
   comments: many(comments),
+  followers: many(userFollows, { relationName: "followed" }),
+  following: many(userFollows, { relationName: "follower" }),
 }));
 
 export const articles = sqliteTable("articles", {
@@ -118,5 +120,33 @@ export const commentRelations = relations(comments, ({ one }) => ({
   article: one(articles, {
     fields: [comments.articleId],
     references: [articles.id],
+  }),
+}));
+
+export const userFollows = sqliteTable(
+  "userFollows",
+  {
+    followerId: integer("followerId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    followedId: integer("followedId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  t => ({
+    pk: primaryKey({ columns: [t.followerId, t.followedId] }),
+  })
+);
+
+export const userFollowsRelations = relations(userFollows, ({ one }) => ({
+  follower: one(users, {
+    fields: [userFollows.followerId],
+    references: [users.id],
+    relationName: "follower",
+  }),
+  followed: one(users, {
+    fields: [userFollows.followedId],
+    references: [users.id],
+    relationName: "followed",
   }),
 }));

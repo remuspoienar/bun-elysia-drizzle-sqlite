@@ -25,7 +25,7 @@ describe("Articles requests", () => {
       title: "How to train your dragon",
       description: "Ever wonder how?",
       body: "Very carefully.",
-      tagList: ["training", "dragons"],
+      tagList: ["dragons", "training"],
     };
 
     const createArticleResponse = await app.handle(
