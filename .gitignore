@@ -33,3 +33,5 @@ yarn-debug.log*
 yarn-error.log*
 
 sqlite/*.sqlite
+sqlite/*.sqlite-shm
+sqlite/*.sqlite-wal

@@ -5,6 +5,6 @@ export default {
   out: "./sqlite/migrations",
   driver: "better-sqlite",
   dbCredentials: {
-    url: "sqlite/realworld.sqlite"
+    url: Bun.env.DB || "sqlite/realworld.sqlite"
   }
 } satisfies Config;

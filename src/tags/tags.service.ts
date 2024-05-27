@@ -24,9 +24,9 @@ export abstract class TagService {
       .insert(tags)
       .values(nonExistingTags.map(t => ({ name: t })))
       .returning()
-      .get();
+      .all();
 
-    return [...existingTags, newTags];
+    return [...existingTags, ...newTags];
   }
 
   static createLink(

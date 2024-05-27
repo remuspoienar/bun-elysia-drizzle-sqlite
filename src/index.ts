@@ -5,7 +5,7 @@ import { unprocessable } from "./common/utils";
 import tagsController from "./tags/tags.controller";
 import usersController from "./users/users.controller";
 
-const app = new Elysia({ prefix: "/api" })
+export const app = new Elysia({ prefix: "/api" })
   .use(cors())
   .onError(({ set, error }) => {
     set.headers["content-type"] = "application/json";

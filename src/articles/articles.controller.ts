@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import jwt from "../common/jwt";
-import { getAuthUserId } from "../common/utils";
+import { getAuthUserId, unauthorized } from "../common/utils";
 import { articleBase, articlePayload } from "./articles.schema";
 import { ArticleService } from "./articles.service";
 
@@ -44,9 +44,11 @@ export const articlesController = new Elysia({ prefix: "/articles" })
   )
   .guard(
     {
-      headers: t.Object({
-        authorization: t.TemplateLiteral("Token ${string}"),
-      }),
+      beforeHandle({ headers: { authorization, ...headers } }) {
+        if (!authorization || authorization.toString() === "") {
+          throw unauthorized();
+        }
+      },
     },
     app =>
       app

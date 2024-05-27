@@ -39,6 +39,7 @@ export abstract class ArticleService {
         const res = tx.insert(articles).values(values).returning().get();
         if (isDefined(tagList) && tagList.length > 0) {
           const tags = TagService.findOrCreate(tagList, tx);
+          console.log({tags})
           TagService.createLink(res.id, tags, tx);
         }
 

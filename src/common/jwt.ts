@@ -8,4 +8,4 @@ const jwt = elysisaJwt({
 
 export default jwt;
 
-export type JwtContext = { jwt: (typeof jwt)["decorator"]["jwt"] };
+export type JwtContext = Pick<typeof jwt.decorator, "jwt">;
