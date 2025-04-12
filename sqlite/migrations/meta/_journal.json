@@ -1,40 +1,11 @@
 {
-  "version": "5",
   "dialect": "sqlite",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1714520864015,
-      "tag": "0000_absent_baron_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1714677160396,
-      "tag": "0001_lucky_warpath",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1714765265068,
-      "tag": "0002_safe_reptil",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1716727288734,
-      "tag": "0003_thin_invisible_woman",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1716749102643,
-      "tag": "0004_empty_ink",
+      "version": "6",
+      "when": 1744411570146,
+      "tag": "0000_tranquil_metal_master",
       "breakpoints": true
     }
   ]
