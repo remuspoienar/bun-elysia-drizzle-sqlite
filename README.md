@@ -15,6 +15,14 @@ We've gone to great lengths to adhere to the **Elysia** community styleguides & 
 
 For more information on how to this works with other frontends/backends, head over to the [RealWorld](https://github.com/gothinkster/realworld) repo.
 
+## Currently supported versions
+```
+Bun - 1.2.9
+Elysia - 1.2.25 (1.2.0 for plugins)
+Drizzle ORM - 0.41.0 
+Drizzle kit - 0.30.6
+```
+
 # How it works
 
 > **ElysiaJS** is a web framework written in Bun so i'm using that as the runtime for this project as well
@@ -28,21 +36,21 @@ On top of that whenver you add something inside a middleware(or plugin) it will 
 
 Structure wise this is closer to something like NestJS, since Elysia is not really opinionated on naming/structure it a higher level. This is an MVC pattern based structure, where each resource(article,user,etc) will have its own folder.
 
-### src/api folder
+### src/api
 
 - `*.controller.ts` denotes a controller file, which is an Elysia plugin (separated for each resource as recommended by [the docs](https://elysiajs.com/essential/plugin.html#plugin))
 - `*.service.ts` will hold any logic, to keep controllers lean
 - `*.schema.ts` file will hold related schema objects and types either inferred or generated from them, will be used in both controller and service files
 - `*.utils.ts` optionally for even more granular logic related to a resource
 
-### src/db folder
+### src/db
 
-Will contain logic to create a database connection, a migration script and the schema definitions
-Note that /sqlite folder will contain the DB files and the generated migrations
+Will expose a database connection and the schema definitions
+Note that `/sqlite` folder will contain the DB files and the generated migrations
 
 :warning: **Pro tip** In order to generate sql migration scripts one needs only to change the `schema.ts` file and run `bun migration:create`, drizzle-kit will figure out how to generate sql from those changes
 
-### src/test folder
+### src/test
 
 A few integration tests, using an in-memory sqlite database
 
@@ -57,27 +65,34 @@ Last but not least this repo is not just a fork of the realworld starter kit but
 
 # Getting started
 
-Install dependencies
+- Install dependencies
+  > bun install
 
-> bun install
+- Setup
+  > bun migration:run
 
-Setup
+- Start local server
+  > bun dev 
 
-> bun migration:run
+  OR
+  > bun start
 
-Start local server
+##
+#### Useful
+###
+- Run local tests
+  > bun test
 
-> bun dev
+- Run the integration tests(from the realworld submodule)
+  > APIURL=http://localhost:3001/api ./realworld/api/run-api-tests.sh
 
-Run local tests
+  :warning: Requires the local server to be started
 
-> bun test
+- Update db snapshots
+  > bun migration:snapshots
 
-Run the integration tests(from the realworld submodule)
-Requires the local server to be started
-
-> APIURL=http://localhost:3001/api ./realworld/api/run-api-tests.sh
-
+- Generate bundle 
+  > bun bundle
 
 <!-- <style type="text/css" style="display: none">
   *:has(>img[src*="#logo"]) {
